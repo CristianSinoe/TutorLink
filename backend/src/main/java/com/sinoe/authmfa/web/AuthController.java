@@ -41,9 +41,9 @@ public class AuthController {
     record ActivateRequest(String token) {
     }
 
-    // =========================
+    
     // 1) Registro normal (front público)
-    // =========================
+    
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody AuthDtos.RegisterRequest reqDto,
                                       HttpServletRequest http) {
@@ -102,9 +102,9 @@ public class AuthController {
         }
     }
 
-    // =========================
+    
     // 2) Activación de cuenta creada por ADMIN (flujo viejo por token de activación)
-    // =========================
+    
     @PostMapping("/activate")
     public ResponseEntity<?> activate(@RequestBody ActivateRequest req, HttpServletRequest http) {
         String rawToken = req.token();
@@ -148,9 +148,9 @@ public class AuthController {
         return ResponseEntity.ok(new AuthDtos.ApiMessage("Cuenta activada correctamente"));
     }
 
-    // =========================
+    
     // 2.1) Completar primer login (link enviado por correo)
-    // =========================
+    
     @PostMapping("/first-login/complete")
     public ResponseEntity<?> completeFirstLogin(@Valid @RequestBody FirstLoginRequest req,
                                                 HttpServletRequest http) {
@@ -206,9 +206,9 @@ public class AuthController {
         }
     }
 
-    // =========================
+    
     // 3) Login
-    // =========================
+    
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody AuthDtos.LoginRequest reqDto,
                                    HttpServletRequest http) {
@@ -360,9 +360,9 @@ public class AuthController {
         }
     }
 
-    // =========================
+    
     // 4) Solicitar cambio de contraseña (envía OTP)
-    // =========================
+    
     @PostMapping("/password/change/request")
     public ResponseEntity<?> requestPasswordChange(
             Authentication auth,
@@ -396,9 +396,9 @@ public class AuthController {
                 new AuthDtos.ApiMessage("Se envió un código a tu correo institucional."));
     }
 
-    // =========================
+    
     // 5) Confirmar cambio de contraseña (valida OTP)
-    // =========================
+    
     @PostMapping("/password/change/confirm")
     public ResponseEntity<?> confirmPasswordChange(
             Authentication auth,
@@ -465,7 +465,7 @@ public class AuthController {
                 new AuthDtos.ApiMessage("Contraseña actualizada correctamente."));
     }
 
-    // -------- helpers --------
+    // helpers
     private static String lower(String s) {
         return s == null ? null : s.toLowerCase();
     }

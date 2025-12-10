@@ -37,9 +37,8 @@ public class TutorController {
     record ApiMessage(String message) {
     }
 
-    // ==============================
     // LISTAR PREGUNTAS PENDIENTES
-    // ==============================
+
     @GetMapping("/questions/pending")
     public ResponseEntity<?> pending(@RequestParam(required = false) Scope scope) {
 
@@ -50,9 +49,9 @@ public class TutorController {
         return ResponseEntity.ok(out);
     }
 
-    // ==============================
+
     // RESPONDER
-    // ==============================
+
     @PostMapping("/questions/{id}/answer")
     public ResponseEntity<?> answer(
             @PathVariable("id") Long id,
@@ -75,9 +74,9 @@ public class TutorController {
                 .body(body);
     }
 
-    // ==============================
+
     // CORREGIR
-    // ==============================
+
     @PostMapping("/questions/{id}/correct")
     public ResponseEntity<?> correct(
             @PathVariable("id") Long id,
@@ -99,9 +98,9 @@ public class TutorController {
                 .body(body);
     }
 
-    // ==============================
+
     // RECHAZAR
-    // ==============================
+
     @PostMapping("/questions/{id}/reject")
     public ResponseEntity<?> reject(
             @PathVariable("id") Long id, // 👈 CAMBIO
@@ -117,9 +116,9 @@ public class TutorController {
         return ResponseEntity.ok(new ApiMessage("REJECTED"));
     }
 
-    // ==============================
+
     // RECLASIFICAR
-    // ==============================
+
     @PostMapping("/questions/{id}/reclassify")
     public ResponseEntity<?> reclassify(
             @PathVariable("id") Long id, // 👈 CAMBIO
@@ -135,9 +134,9 @@ public class TutorController {
         return ResponseEntity.ok(new ApiMessage("RECLASSIFIED"));
     }
 
-    // ==============================
+
     // DASHBOARD DEL TUTOR
-    // ==============================
+
 
     @GetMapping("/dashboard/summary")
     public ResponseEntity<TutorDashboardSummaryDto> dashboardSummary(Authentication auth) {
@@ -162,9 +161,9 @@ public class TutorController {
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
-    // ==============================
+ 
     // HISTORIAL DE RESPUESTAS (TUTOR)
-    // ==============================
+
     @GetMapping("/answers/history")
     public ResponseEntity<?> getAnswerHistoryForTutor(
             @RequestParam("questionId") Long questionId,
@@ -201,9 +200,9 @@ public class TutorController {
         return ResponseEntity.ok(list);
     }
 
-    // ==============================
+
     // PREGUNTAS PENDIENTES DEL TUTOR
-    // ==============================
+
     @GetMapping("/questions/pending/my")
     public ResponseEntity<java.util.List<TutorPendingQuestionDto>> myPendingQuestions(
             @RequestParam(name = "scope", required = false) String scope,
@@ -217,9 +216,9 @@ public class TutorController {
         return ResponseEntity.ok(list);
     }
 
-    // ==============================
+
     // HISTORIAL DE RESPUESTAS (LISTADO)
-    // ==============================
+
     @GetMapping("/questions/history")
     public ResponseEntity<java.util.List<TutorHistoryItemDto>> history(
             Authentication auth,
@@ -238,9 +237,9 @@ public class TutorController {
         return ResponseEntity.ok(list);
     }
 
-    // ==============================
+
     // PERFIL DEL TUTOR
-    // ==============================
+
     @GetMapping("/profile")
     public ResponseEntity<?> getProfile(Authentication auth) {
         Long userId = qa.requireUserByEmail(auth.getName()).getId();

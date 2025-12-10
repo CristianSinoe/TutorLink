@@ -13,10 +13,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     Optional<Student> findByMatricula(String matricula);
 
-    /**
-     * Devuelve estudiantes que NO tienen ningún tutor asignado (sin registros en TutorStudent),
-     * opcionalmente filtrando por prefijo de matrícula / nombre.
-     */
+    // Devuelve estudiantes que NO tienen ningún tutor asignado (sin registros en TutorStudent), opcionalmente filtrando por prefijo de matrícula / nombre
     @Query("""
             SELECT s
             FROM Student s

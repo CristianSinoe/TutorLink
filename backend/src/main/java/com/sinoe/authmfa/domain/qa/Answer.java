@@ -25,7 +25,7 @@ public class Answer {
     @JsonIgnore
     private Question question;
 
-    // Tutor que responde (YA NO User)
+    // Tutor que responde
     @ManyToOne(optional = false)
     @JoinColumn(name = "tutor_id")
     private Tutor tutor;
@@ -33,7 +33,7 @@ public class Answer {
     @Column(nullable = false, columnDefinition = "text")
     private String body;
 
-    // Para controlar versiones internas si quieres manejar "correcciones"
+    // Para controlar versiones internas para manejar "correcciones"
     @Column(nullable = false)
     private Integer version;
 

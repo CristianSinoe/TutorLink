@@ -13,9 +13,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByActivationToken(String activationToken);
 
-    // Nuevo: búsqueda para completar el primer inicio de sesión
+    // Búsqueda para completar el primer inicio de sesión
     Optional<User> findByFirstLoginToken(String token);
 
-    // Nuevo: listar usuarios por rol (por ejemplo, ADMIN)
+    // Listar usuarios por rol (por ejemplo, ADMIN)
     List<User> findByRole(UserRole role);
 }

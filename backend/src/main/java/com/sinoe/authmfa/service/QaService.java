@@ -41,9 +41,8 @@ public class QaService {
     private final AnswerRepository answers;
     private final TutorStudentRepository tutorStudentRepository;
 
-    // ====================
     // HELPERS
-    // ====================
+
 
     public User requireUserByEmail(String email) {
         return users.findByEmail(email)
@@ -70,9 +69,9 @@ public class QaService {
                 .orElseThrow(() -> new EntityNotFoundException("No se encontró el estudiante con id=" + studentId));
     }
 
-    // ======================================================
+
     // 1) CREAR PREGUNTA (ASIGNA TUTOR AUTOMÁTICAMENTE)
-    // ======================================================
+
     @Transactional
     public Question createQuestion(Long studentId, Scope scope, String title, String body) {
 
@@ -87,7 +86,7 @@ public class QaService {
         // 3) Creamos la pregunta
         var q = Question.builder()
                 .student(student)
-                .tutor(tutor) // 👈 ya va con el tutor asignado (si existe)
+                .tutor(tutor) // ya va con el tutor asignado (si existe)
                 .scope(scope)
                 .title(title)
                 .body(body)
@@ -97,9 +96,7 @@ public class QaService {
         return questions.save(q);
     }
 
-    // ====================
     // RESPONDER O CORREGIR
-    // ====================
 
     @Transactional
     public Answer publishOrCorrect(Long userId, Long questionId, String body, boolean correction) {
@@ -136,9 +133,7 @@ public class QaService {
         return ans;
     }
 
-    // ====================
     // RECHAZAR PREGUNTA
-    // ====================
 
     @Transactional
     public void reject(Long userId, Long questionId, String reason) {
@@ -159,9 +154,7 @@ public class QaService {
         questions.save(q);
     }
 
-    // ====================
     // RECLASIFICAR
-    // ====================
 
     @Transactional
     public void reclassify(Long userId, Long questionId, Scope newScope) {
@@ -175,9 +168,8 @@ public class QaService {
         }
     }
 
-    // ======================================================
     // LISTAR PREGUNTAS DEL ESTUDIANTE (PAGINADO)
-    // ======================================================
+    
     @Transactional(readOnly = true)
     public PagedResponse<QaDtos.QuestionSummary> findQuestionsForStudent(
             Long studentId,
@@ -242,9 +234,8 @@ public class QaService {
                 result.getTotalPages());
     }
 
-    // ======================================================
     // DETALLE DE PREGUNTA PARA UN ESTUDIANTE
-    // ======================================================
+
     @Transactional(readOnly = true)
     public QaDtos.StudentQuestionDetail getQuestionDetailForStudent(Long userId, Long questionId) {
         // Obtener el estudiante a partir del userId
@@ -274,7 +265,6 @@ public class QaService {
             tutorEmail = tuUser.getEmail();
         }
 
-        // Por ahora dejamos estos campos en null (todavía no usamos entidad Answer)
         String currentAnswerBody = null;
         Integer currentAnswerVersion = null;
         Boolean wasCorrected = null;
@@ -297,9 +287,7 @@ public class QaService {
                 .build();
     }
 
-    // ======================================================
     // DASHBOARD DEL TUTOR
-    // ======================================================
 
     @Transactional(readOnly = true)
     public TutorDashboardSummaryDto getTutorDashboardSummary(Long userId) {
@@ -376,7 +364,7 @@ public class QaService {
         java.util.List<Question> base = questions
                 .findByTutor_IdAndStatusOrderByCreatedAtAsc(tutor.getId(), Status.PENDIENTE);
 
-        // 2) Scope opcional -> lo calculamos y luego lo copiamos a una variable final
+        // 2) Scope opcional lo calculamos y luego lo copiamos a una variable final
         Scope tmpScope = null;
         if (scopeRaw != null && !scopeRaw.isBlank() && !"ALL".equalsIgnoreCase(scopeRaw)) {
             try {
@@ -434,9 +422,8 @@ public class QaService {
                 .toList();
     }
 
-    // ======================================================
     // HISTORIAL DEL TUTOR
-    // ======================================================
+    
     @Transactional(readOnly = true)
     public List<TutorHistoryItemDto> findTutorHistory(
             Long userId,
@@ -530,9 +517,8 @@ public class QaService {
                 .toList();
     }
 
-    // ======================================================
     // HISTORIAL DE RESPUESTAS DEL TUTOR (UNA FILA POR PREGUNTA)
-    // ======================================================
+    
     @Transactional(readOnly = true)
     public java.util.List<TutorHistoryItemDto> findTutorHistoryForTutor(
             Long userId,
@@ -556,7 +542,7 @@ public class QaService {
 
         // 3) Parsear filtros (opcionales) usando temporales + finales
 
-        // --- STATUS ---
+        // STATUS
         Status tmpStatus = null;
         if (statusRaw != null && !statusRaw.isBlank() && !"ALL".equalsIgnoreCase(statusRaw)) {
             try {
@@ -567,7 +553,7 @@ public class QaService {
         }
         final Status statusFilter = tmpStatus;
 
-        // --- SCOPE ---
+        // SCOPE
         Scope tmpScope = null;
         if (scopeRaw != null && !scopeRaw.isBlank() && !"ALL".equalsIgnoreCase(scopeRaw)) {
             try {
@@ -578,7 +564,7 @@ public class QaService {
         }
         final Scope scopeFilter = tmpScope;
 
-        // --- TEXTO ---
+        // TEXTO
         final String term = (text != null && !text.isBlank())
                 ? text.toLowerCase()
                 : null;

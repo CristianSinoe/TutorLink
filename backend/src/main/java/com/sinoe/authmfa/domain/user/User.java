@@ -78,9 +78,8 @@ public class User {
         updatedAt = OffsetDateTime.now();
     }
 
-    // =============================
     //   Token de primer inicio
-    // =============================
+
     @Column(name = "first_login_token", length = 255)
     private String firstLoginToken;
 

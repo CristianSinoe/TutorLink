@@ -2,7 +2,7 @@ package com.sinoe.authmfa.dto.qa;
 
 import java.time.Instant;
 
-/** Para listas (student/tutor). */
+// Para listas (student/tutor)
 public record QuestionSummaryDto(
         Long id,
         String title,

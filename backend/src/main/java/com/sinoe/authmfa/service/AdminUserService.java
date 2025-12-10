@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,9 +29,8 @@ public class AdminUserService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
-    // ========================
     // Crear ESTUDIANTE + perfil
-    // ========================
+
     @Transactional
     public Student createStudentUser(AdminUserDtos.CreateStudentUser dto) {
 
@@ -85,9 +83,8 @@ public class AdminUserService {
         return s;
     }
 
-    // ========================
     // Crear TUTOR
-    // ========================
+
     @Transactional
     public Tutor createTutorUser(AdminUserDtos.CreateTutorUser dto) {
 
@@ -134,9 +131,8 @@ public class AdminUserService {
         return t;
     }
 
-    // ========================
-    // NUEVO: Crear ADMIN
-    // ========================
+    //Crear ADMIN
+
     @Transactional
     public User createAdminUser(AdminUserDtos.CreateAdminUser dto) {
 
@@ -176,9 +172,8 @@ public class AdminUserService {
         return u;
     }
 
-    // ========================
     // Cambiar estado
-    // ========================
+    
     @Transactional
     public User changeUserStatus(Long userId, String statusRaw) {
         User u = users.findById(userId)
@@ -195,9 +190,8 @@ public class AdminUserService {
         return users.save(u);
     }
 
-    // ========================
     // Importar ESTUDIANTES CSV
-    // ========================
+
     @Transactional
     public AdminUserDtos.CsvImportResult importStudentsFromCsv(String csv) {
 
@@ -289,9 +283,8 @@ public class AdminUserService {
                 .build();
     }
 
-    // ========================
     // Importar TUTORES CSV
-    // ========================
+
     @Transactional
     public AdminUserDtos.CsvImportResult importTutorsFromCsv(String csv) {
 
@@ -386,9 +379,8 @@ public class AdminUserService {
         return t.isEmpty() ? null : t;
     }
 
-    // ========================
     // Asignar estudiante a tutor
-    // ========================
+
     @Transactional
     public void assignStudentToTutor(AdminUserDtos.AssignStudentToTutor dto, Long adminUserId) {
 

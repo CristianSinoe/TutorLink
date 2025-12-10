@@ -58,9 +58,8 @@ public class QaDtos {
         private Scope scope;
     }
 
-    // ============================
     // RESUMEN DE PREGUNTA (para listado del estudiante)
-    // ============================
+
     @Getter
     @Setter
     @NoArgsConstructor
@@ -74,9 +73,8 @@ public class QaDtos {
         private String createdAt;
     }
 
-        // ============================
     // DETALLE DE PREGUNTA (vista estudiante)
-    // ============================
+
     @Getter
     @Setter
     @NoArgsConstructor
@@ -100,7 +98,7 @@ public class QaDtos {
         private Integer currentAnswerVersion;
         private Boolean wasCorrected;
 
-        // Motivo de rechazo (si aplica)
+        // Motivo de rechazo
         private String rejectReason;
     }
 

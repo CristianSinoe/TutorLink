@@ -27,21 +27,16 @@ public class OtpService {
     @Value("${otp.resend-cooldown-seconds}")
     private long resendCooldown;
 
-    // ==========================
     // UTILIDADES INTERNAS
-    // ==========================
 
-    /**
-     * Genera un código de 6 dígitos con padding de ceros.
-     */
+    // Genera un código de 6 dígitos con padding de ceros.
+
     private String generateCode() {
         return String.format("%06d", random.nextInt(1_000_000));
     }
 
-    /**
-     * Método genérico para generar y guardar un OTP para un usuario y propósito dado.
-     * Devuelve solamente el código, para flujos donde no se necesita el publicId.
-     */
+    // Método genérico para generar y guardar un OTP para un usuario y propósito dado.Devuelve solamente el código, para flujos donde no se necesita el publicId
+
     public String generateAndSave(Long userId, String purpose) {
         String code = generateCode();
         String publicId = UUID.randomUUID().toString();
@@ -63,10 +58,8 @@ public class OtpService {
         return code;
     }
 
-    /**
-     * Método genérico para validar un OTP por usuario + propósito.
-     * Se toma el último OTP creado para ese usuario y propósito.
-     */
+    // Método genérico para validar un OTP por usuario + propósito. Se toma el último OTP creado para ese usuario y propósito
+
     public boolean validateAndConsume(Long userId, String purpose, String code) {
         Optional<OtpCode> opt = otpRepository
                 .findTopByUserIdAndPurposeOrderByCreatedAtDesc(userId, purpose);
@@ -104,9 +97,8 @@ public class OtpService {
         return ok;
     }
 
-    // ==========================
     // GENERAR OTP PARA LOGIN (como ya lo tenías)
-    // ==========================
+
     public OtpCode generateLoginOtpForUser(Long userId) {
         String code = generateCode();
         String publicId = UUID.randomUUID().toString();
@@ -141,9 +133,8 @@ public class OtpService {
         );
     }
 
-    // ==========================
     // VALIDAR OTP POR publicId (LOGIN)
-    // ==========================
+
     public OtpCode validateForLogin(String publicId, String code) {
         Optional<OtpCode> opt = otpRepository.findByPublicIdAndPurpose(publicId, "LOGIN");
         if (opt.isEmpty()) {
@@ -180,22 +171,16 @@ public class OtpService {
         return ok ? otp : null;
     }
 
-    // ==========================
     // HELPERS ESPECÍFICOS PARA PASSWORD_CHANGE
-    // ==========================
 
-    /**
-     * Genera un OTP para el propósito PASSWORD_CHANGE y devuelve solamente el código.
-     * Ideal para usar en el flujo de cambio de contraseña del usuario autenticado.
-     */
+    //Genera un OTP para el propósito PASSWORD_CHANGE y devuelve solamente el código. Ideal para usar en el flujo de cambio de contraseña del usuario autenticado
+
     public String generatePasswordChangeOtpForUser(Long userId) {
         return generateAndSave(userId, "PASSWORD_CHANGE");
     }
 
-    /**
-     * Valida un OTP para el propósito PASSWORD_CHANGE, usando el último OTP
-     * asociado a ese usuario y propósito.
-     */
+    // Valida un OTP para el propósito PASSWORD_CHANGE, usando el último OTP, asociado a ese usuario y propósito
+    
     public boolean validatePasswordChangeOtp(Long userId, String code) {
         return validateAndConsume(userId, "PASSWORD_CHANGE", code);
     }

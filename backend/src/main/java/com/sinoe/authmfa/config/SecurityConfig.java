@@ -40,7 +40,7 @@ public class SecurityConfig {
                                 "/api/auth/register",
                                 "/api/auth/login",
                                 "/api/auth/activate",
-                                "/api/auth/first-login/complete", // ⬅ nuevo endpoint público
+                                "/api/auth/first-login/complete",
                                 "/api/recaptcha/verify",
                                 "/api/auth/login",
                                 "/api/auth/login/verify-otp",
@@ -91,7 +91,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // mismo algoritmo que usabas con BCrypt, pero gestionado por Spring
         return new BCryptPasswordEncoder();
     }
 }

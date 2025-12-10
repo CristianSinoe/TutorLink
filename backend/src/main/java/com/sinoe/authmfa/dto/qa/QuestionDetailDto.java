@@ -2,7 +2,7 @@ package com.sinoe.authmfa.dto.qa;
 
 import java.time.Instant;
 
-/** Detalle para el dueño (student) o para revisión (tutor si lo necesitas). */
+// Detalle para revisión
 public record QuestionDetailDto(
         Long id,
         String title,

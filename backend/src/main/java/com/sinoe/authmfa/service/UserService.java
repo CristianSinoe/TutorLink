@@ -28,11 +28,6 @@ public class UserService {
         return email != null && users.existsByEmail(email.toLowerCase());
     }
 
-    /**
-     * Creador principal con apellidos separados.
-     * NOTA: por ahora ya no se guardan datos académicos ni de perfil aquí.
-     * Eso vivirá en Student/Tutor más adelante.
-     */
     public User createUser(
             String name,
             String lastNamePaterno,
@@ -40,11 +35,11 @@ public class UserService {
             String email,
             String rawPassword,
             UserRole role,
-            String career,          // ya no se usan aquí
-            String plan,            // ya no se usan aquí
-            Integer semester,       // ya no se usan aquí
-            LocalDate birthDate,    // validado pero no guardado en User
-            String phone) {         // ya no se usa aquí
+            String career,          
+            String plan,          
+            Integer semester,      
+            LocalDate birthDate,    
+            String phone) {  
         String hash = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
         User u = User.builder()
                 .name(name)
@@ -53,17 +48,14 @@ public class UserService {
                 .email(email.toLowerCase())
                 .passwordHash(hash)
                 .role(role)
-                .status(UserStatus.ACTIVE)   // por ahora lo dejamos activo
+                .status(UserStatus.ACTIVE)
                 .build();
         return users.save(u);
     }
 
-    /**
-     * Overload de compatibilidad: recibe un solo "lastName" y lo mapea a PATERNO.
-     */
     public User createUser(
             String name,
-            String lastName, // mapeado a paterno
+            String lastName,
             String email,
             String rawPassword,
             UserRole role,
@@ -102,7 +94,7 @@ public class UserService {
         );
     }
 
-    // -------- helpers --------
+    // helpers
     private static String emptyToNull(String s) {
         if (s == null)
             return null;
