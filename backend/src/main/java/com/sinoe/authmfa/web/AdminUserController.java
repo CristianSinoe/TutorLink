@@ -40,9 +40,8 @@ public class AdminUserController {
     record ApiMessage(String message) {
     }
 
-    // ==========================
     // Listar todos los usuarios
-    // ==========================
+
     @GetMapping
     public ResponseEntity<?> listAll() {
         List<UserRow> list = users.findAll()
@@ -59,18 +58,16 @@ public class AdminUserController {
         return ResponseEntity.ok(list);
     }
 
-    // ====================================
     // Listar ESTUDIANTES (con estado, plan, birthDate, phone, etc.)
-    // ====================================
+
     @GetMapping("/students")
     public ResponseEntity<?> listStudents() {
         var list = adminUserService.listStudentsWithProfile();
         return ResponseEntity.ok(list);
     }
 
-    // ====================================
     // Crear usuario ESTUDIANTE + perfil
-    // ====================================
+
     @PostMapping("/students")
     public ResponseEntity<?> createStudent(@Valid @RequestBody AdminUserDtos.CreateStudentUser dto) {
         try {
@@ -81,9 +78,8 @@ public class AdminUserController {
         }
     }
 
-    // ====================================
-    // NUEVO: Actualizar usuario ESTUDIANTE + perfil
-    // ====================================
+    // Actualizar usuario ESTUDIANTE + perfil
+
     @PutMapping("/students/{userId}")
     public ResponseEntity<?> updateStudent(
             @PathVariable("userId") Long userId,
@@ -98,9 +94,9 @@ public class AdminUserController {
         }
     }
 
-    // ====================================
+
     // Crear usuario TUTOR + perfil
-    // ====================================
+
     @PostMapping("/tutors")
     public ResponseEntity<?> createTutor(@Valid @RequestBody AdminUserDtos.CreateTutorUser dto) {
         try {
@@ -111,9 +107,9 @@ public class AdminUserController {
         }
     }
 
-    // ====================================
+
     // Importar ESTUDIANTES desde CSV
-    // ====================================
+
     @PostMapping("/students/import-csv")
     public ResponseEntity<?> importStudentsCsv(
             @Valid @RequestBody AdminUserDtos.CsvTextRequest dto) {
@@ -125,9 +121,9 @@ public class AdminUserController {
         }
     }
 
-    // ====================================
+
     // Importar TUTORES desde CSV
-    // ====================================
+
     @PostMapping("/tutors/import-csv")
     public ResponseEntity<?> importTutorsCsv(
             @Valid @RequestBody AdminUserDtos.CsvTextRequest dto) {
@@ -139,9 +135,9 @@ public class AdminUserController {
         }
     }
 
-    // ====================================
+
     // Cambiar estado de usuario
-    // ====================================
+
     @PatchMapping("/{userId}/status")
     public ResponseEntity<?> changeStatus(
             @PathVariable("userId") Long userId,
@@ -154,9 +150,9 @@ public class AdminUserController {
         }
     }
 
-    // ====================================
+
     // Asignar estudiante a tutor
-    // ====================================
+
     @PostMapping("/tutor-students/assign")
     public ResponseEntity<?> assignStudentToTutor(
             @Valid @RequestBody AdminUserDtos.AssignStudentToTutor dto,
@@ -182,9 +178,9 @@ public class AdminUserController {
         }
     }
 
-    // ====================================
+
     // Asignación masiva de estudiantes a tutores vía CSV
-    // ====================================
+
     @PostMapping("/tutor-students/import-csv")
     public ResponseEntity<?> importTutorStudentsCsv(
             @Valid @RequestBody AdminUserDtos.AssignTutorStudentsCsvRequest dto,
@@ -201,9 +197,9 @@ public class AdminUserController {
         return ResponseEntity.ok(result);
     }
 
-    // ====================================
+
     // Listar asignaciones TUTOR–ESTUDIANTE
-    // ====================================
+
     @GetMapping("/tutor-students")
     public ResponseEntity<?> listAssignments(
             @RequestParam(name = "tutorCode", required = false) String tutorCode,
@@ -213,18 +209,18 @@ public class AdminUserController {
         return ResponseEntity.ok(list);
     }
 
-    // ====================================
+
     // Listar TUTORES (con estado, depto, phone, etc.)
-    // ====================================
+
     @GetMapping("/tutors")
     public ResponseEntity<?> listTutors() {
         var list = adminUserService.listTutorsWithProfile();
         return ResponseEntity.ok(list);
     }
 
-    // ====================================
-    // NUEVO: Actualizar usuario TUTOR + perfil
-    // ====================================
+
+    // Actualizar usuario TUTOR + perfil
+
     @PutMapping("/tutors/{userId}")
     public ResponseEntity<?> updateTutor(
             @PathVariable("userId") Long userId,
@@ -239,9 +235,9 @@ public class AdminUserController {
         }
     }
 
-    // ====================================
+
     // Eliminar asignación TUTOR–ESTUDIANTE (DELETE)
-    // ====================================
+
     @DeleteMapping("/tutor-students/{id}")
     public ResponseEntity<?> deleteTutorStudentAssignment(@PathVariable("id") Long id) {
         try {
@@ -252,10 +248,10 @@ public class AdminUserController {
         }
     }
 
-    // ====================================
+
     // Sugerencias de estudiantes NO asignados
     // (para autocomplete del input de matrícula)
-    // ====================================
+
     @GetMapping("/tutor-students/suggest-students")
     public ResponseEntity<?> suggestUnassignedStudents(
             @RequestParam(name = "q", required = false) String query
@@ -265,9 +261,9 @@ public class AdminUserController {
         return ResponseEntity.ok(suggestions);
     }
 
-    // ====================================
-    // NUEVO: Listar administradores
-    // ====================================
+
+    // Listar administradores
+
     @GetMapping("/admins")
     public ResponseEntity<?> listAdmins() {
         List<UserRow> list = users.findByRole(UserRole.ADMIN)
@@ -285,9 +281,9 @@ public class AdminUserController {
         return ResponseEntity.ok(list);
     }
 
-    // ====================================
-    // NUEVO: Crear usuario ADMIN
-    // ====================================
+
+    // Crear usuario ADMIN
+
     @PostMapping("/admins")
     public ResponseEntity<?> createAdmin(
             @Valid @RequestBody AdminUserDtos.CreateAdminUser dto) {

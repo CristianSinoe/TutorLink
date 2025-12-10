@@ -34,9 +34,8 @@ public class StudentController {
     private final AuditService audit;
     private final TutorStudentRepository tutorStudents;
 
-    // ==========================
+
     // DTOs internos
-    // ==========================
 
     public record ApiMessage(String message) {
     }
@@ -57,9 +56,8 @@ public class StudentController {
             String phone) {
     }
 
-    // ======================================================
     // 1) CREAR PREGUNTA
-    // ======================================================
+
     @PostMapping("/questions")
     public ResponseEntity<?> create(
             @Valid @RequestBody QaDtos.NewQuestion dto,
@@ -103,9 +101,8 @@ public class StudentController {
         }
     }
 
-    // ======================================================
     // 2) MIS PREGUNTAS (PAGINADAS)
-    // ======================================================
+
     @GetMapping("/questions/my")
     public ResponseEntity<PagedResponse<QaDtos.QuestionSummary>> myQuestions(
             Authentication auth,
@@ -128,9 +125,8 @@ public class StudentController {
         return ResponseEntity.ok(result);
     }
 
-    // ======================================================
     // 3) DETALLE DE PREGUNTA PROPIA
-    // ======================================================
+
     @GetMapping("/questions/{id}")
     public ResponseEntity<StudentQuestionDetailDto> getMyQuestionDetail(
             Authentication auth,
@@ -145,9 +141,8 @@ public class StudentController {
         return ResponseEntity.ok(dto);
     }
 
-    // ======================================================
     // 4) HISTORIAL DE RESPUESTAS DE UNA PREGUNTA
-    // ======================================================
+
     @GetMapping("/questions/{id}/answers")
     public ResponseEntity<?> getAnswerHistory(
             @PathVariable("id") Long id,
@@ -173,9 +168,8 @@ public class StudentController {
         return ResponseEntity.ok(list);
     }
 
-    // ======================================================
     // 5) CONSULTAR MI TUTOR ASIGNADO
-    // ======================================================
+
     @GetMapping("/my-tutor")
     public ResponseEntity<?> getMyTutor(Authentication auth) {
 
@@ -210,9 +204,8 @@ public class StudentController {
         return ResponseEntity.ok(dto);
     }
 
-    // ======================================================
     // HELPERS
-    // ======================================================
+
     private static String realIp(HttpServletRequest req) {
         String xf = req.getHeader("X-Forwarded-For");
         if (xf != null && !xf.isBlank()) {

@@ -20,7 +20,7 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Ahora apunta a Student
+    // Apunta a Student
     @ManyToOne(optional = false)
     @JoinColumn(name = "student_id")
     private Student student;

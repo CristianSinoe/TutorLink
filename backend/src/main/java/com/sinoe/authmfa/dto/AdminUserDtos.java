@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 public class AdminUserDtos {
 
-    // ---------- Crear usuario ESTUDIANTE + perfil ----------
+    // Crear usuario ESTUDIANTE + perfil
     @Getter
     @Setter
     @NoArgsConstructor
@@ -60,7 +60,7 @@ public class AdminUserDtos {
         private String phone;
     }
 
-    // ---------- Crear usuario TUTOR + perfil ----------
+    // Crear usuario TUTOR + perfil
     @Getter
     @Setter
     @NoArgsConstructor
@@ -102,7 +102,7 @@ public class AdminUserDtos {
         private String phone;
     }
 
-    // ---------- NUEVO: Crear usuario ADMIN ----------
+    // Crear usuario ADMIN
     @Getter
     @Setter
     @NoArgsConstructor
@@ -127,7 +127,7 @@ public class AdminUserDtos {
         private String email;
     }
 
-    // ---------- Cambiar estado de usuario ----------
+    // Cambiar estado de usuario
     @Getter
     @Setter
     @NoArgsConstructor
@@ -135,12 +135,12 @@ public class AdminUserDtos {
     @Builder
     public static class ChangeUserStatus {
         @NotNull
-        private UserRole role; // opcional
+        private UserRole role;
         @NotBlank
         private String status; // CREATED_BY_ADMIN / ACTIVE / DISABLED / BLOCKED
     }
 
-    // ---------- Importar CSV (genérico) ----------
+    // Importar CSV (genérico)
     @Getter
     @Setter
     @NoArgsConstructor
@@ -162,7 +162,7 @@ public class AdminUserDtos {
         private int skippedExisting;
     }
 
-    // ---------- Asignar estudiante a tutor (1 a 1) ----------
+    // Asignar estudiante a tutor (1 a 1)
     @Getter
     @Setter
     @NoArgsConstructor
@@ -176,7 +176,7 @@ public class AdminUserDtos {
         private String matricula;
     }
 
-    // ---------- Asignar estudiantes a tutores por CSV ----------
+    // Asignar estudiantes a tutores por CSV
     @Getter
     @Setter
     @NoArgsConstructor
@@ -187,7 +187,7 @@ public class AdminUserDtos {
         private String csv;
     }
 
-    // ---------- Asignar estudiantes a tutores por CSV (RESULTADO) ----------
+    // Asignar estudiantes a tutores por CSV (RESULTADO)
     @Getter
     @Setter
     @NoArgsConstructor
@@ -199,7 +199,7 @@ public class AdminUserDtos {
         private int errors; // líneas que fallaron (tutor / estudiante no existe, duplicado, etc.)
     }
 
-    // ---------- Fila para listar estudiantes con perfil ----------
+    // Fila para listar estudiantes con perfil
     @Getter
     @Setter
     @NoArgsConstructor
@@ -223,7 +223,7 @@ public class AdminUserDtos {
         private String status;
     }
 
-    // ---------- NUEVO: Actualizar estudiante ----------
+    // Actualizar estudiante
     @Getter
     @Setter
     @NoArgsConstructor
@@ -326,6 +326,6 @@ public class AdminUserDtos {
             String matricula,
             String studentName,
             String studentEmail,
-            java.time.LocalDateTime createdAt
-    ) {}
+            java.time.LocalDateTime createdAt) {
+    }
 }

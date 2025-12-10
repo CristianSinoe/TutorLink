@@ -22,9 +22,8 @@ public class EmailService {
     @Value("${tutorlink.frontend-base-url}")
     private String frontendBaseUrl;
 
-    // =========================
     // 1) Correo de primer login / activación
-    // =========================
+
     public void sendFirstLoginEmail(String toEmail, String activationToken) {
         String url = frontendBaseUrl + "/first-login?token=" + activationToken;
 
@@ -41,9 +40,8 @@ public class EmailService {
         sendEmail(toEmail, subject, html);
     }
 
-    // =========================
     // 2) Correo genérico HTML
-    // =========================
+
     public void sendEmail(String toEmail, String subject, String htmlContent) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -62,9 +60,8 @@ public class EmailService {
         }
     }
 
-    // =========================
     // 3) NUEVO: correo para cambio de contraseña (OTP)
-    // =========================
+
     public void sendPasswordChangeOtpEmail(String toEmail, String code) {
         String subject = "TutorLink - Código para cambio de contraseña";
 

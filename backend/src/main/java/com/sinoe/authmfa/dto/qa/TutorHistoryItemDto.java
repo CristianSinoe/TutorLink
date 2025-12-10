@@ -6,7 +6,7 @@ public record TutorHistoryItemDto(
         String title,
         String status,
         String scope,
-        String answeredAt,      // 👈 String
+        String answeredAt,
         String studentName,
         String studentEmail
 ) {}

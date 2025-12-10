@@ -8,9 +8,8 @@ import java.time.LocalDate;
 
 public class AuthDtos {
 
-    // ==========
     // REGISTER
-    // ==========
+
     @Getter
     @Setter
     @NoArgsConstructor
@@ -47,9 +46,8 @@ public class AuthDtos {
         private String recaptchaToken;
     }
 
-    // ==========
     // LOGIN
-    // ==========
+
     @Getter
     @Setter
     @NoArgsConstructor
@@ -67,9 +65,8 @@ public class AuthDtos {
         private String recaptchaToken;
     }
 
-    // ==========
     // ACTIVATE ACCOUNT
-    // ==========
+
     @Getter
     @Setter
     @NoArgsConstructor
@@ -84,9 +81,8 @@ public class AuthDtos {
         private String password;
     }
 
-    // ==========
     // RESPUESTAS
-    // ==========
+
     @Getter
     @Setter
     @NoArgsConstructor
@@ -129,21 +125,8 @@ public class AuthDtos {
         private String code;      // código de 6 dígitos que escribió el usuario
     }
 
-    // ============================================
     // NUEVO: Inicio del cambio de contraseña (vacío)
-    // ============================================
-    // @Getter
-    // @Setter
-    // @NoArgsConstructor
-    // @AllArgsConstructor
-    // public static class PasswordChangeStartRequest {
-    //     // Por ahora no requiere campos,
-    //     // pero se deja creado por claridad.
-    // }
 
-    // ============================================
-    // NUEVO: Confirmar cambio de contraseña
-    // ============================================
     @Getter
     @Setter
     @NoArgsConstructor

@@ -45,7 +45,7 @@ public class Tutor {
     @Column(name = "weekly_summary", nullable = false)
     private boolean weeklySummary = false;
 
-    // getters/setters (si no usas Lombok)
+    // getters/setters
 
     public String getBio() {
         return bio;

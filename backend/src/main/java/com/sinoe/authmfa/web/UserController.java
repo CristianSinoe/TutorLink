@@ -91,9 +91,8 @@ public class UserController {
             );
         }
 
-        // ============================
         // ROLE: TUTOR
-        // ============================
+
         if (user.getRole().name().equals("TUTOR")) {
 
             Tutor t = tutorRepository.findByUser_Id(user.getId()).orElse(null);
@@ -135,9 +134,9 @@ public class UserController {
             );
         }
 
-        // ============================
+
         // ROLE: ADMIN
-        // ============================
+
         return ResponseEntity.ok(
                 new MeResponseDto(
                         user.getId(),

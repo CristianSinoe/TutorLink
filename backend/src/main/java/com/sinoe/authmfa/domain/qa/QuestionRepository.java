@@ -17,9 +17,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
         Instant getCreatedAt();
     }
 
-    // ============================
     // STUDENT
-    // ============================
 
     List<Row> findByStudent_IdOrderByCreatedAtDesc(Long studentId);
 
@@ -37,9 +35,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     Page<Question> findByStudent_IdAndStatusAndScope(Long studentId, Status status, Scope scope, Pageable pageable);
 
-    // ============================
     // TUTOR (global y por tutor)
-    // ============================
 
     // global por estado
     List<Question> findByStatusOrderByCreatedAtAsc(Status status);
@@ -48,10 +44,10 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     long countByStatus(Status status);
 
-    // ➕ NUEVO: contar SOLO las preguntas de un tutor por estado
+    // Contar SOLO las preguntas de un tutor por estado
     long countByTutor_IdAndStatus(Long tutorId, Status status);
 
-    // por tutor
+    // Por tutor
     Page<Question> findByTutor_IdOrderByCreatedAtDesc(Long tutorId, Pageable pageable);
 
     // pendientes (o cualquier estado) de un tutor, orden asc

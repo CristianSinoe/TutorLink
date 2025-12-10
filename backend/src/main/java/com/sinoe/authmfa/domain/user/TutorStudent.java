@@ -22,7 +22,7 @@ public class TutorStudent {
     @JoinColumn(name = "tutor_id")
     private Tutor tutor;
 
-    // Un estudiante solo puede aparecer una vez (único)
+    // Un estudiante solo puede aparecer una vez
     @ManyToOne(optional = false)
     @JoinColumn(name = "student_id", unique = true)
     private Student student;
@@ -30,7 +30,7 @@ public class TutorStudent {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-    // Quién hizo la asignación (ADMIN) – opcional de momento
+    // Quién hizo la asignación (ADMIN)
     @ManyToOne
     @JoinColumn(name = "created_by")
     private User createdBy;

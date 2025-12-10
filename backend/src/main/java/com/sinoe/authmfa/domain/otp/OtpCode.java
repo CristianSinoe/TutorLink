@@ -44,13 +44,13 @@ public class OtpCode {
     private Instant lastSentAt;
 
     @Column(nullable = false, length = 30)
-    private String purpose; // p.ej. "LOGIN"
+    private String purpose;
 
-    // 🔹 ID público que mandamos al frontend para identificar el OTP
+    // ID público que mandamos al frontend para identificar el OTP
     @Column(name = "public_id", nullable = false, length = 100, unique = true)
     private String publicId;
 
-    // 🔹 Si ya fue usado (consumido) en un login exitoso
+    // Si ya fue usado (consumido) en un login exitoso
     @Column(nullable = false)
     private boolean consumed;
 }
