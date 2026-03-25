@@ -19,13 +19,11 @@ public class Answer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Relación con pregunta
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "question_id")
     @JsonIgnore
     private Question question;
 
-    // Tutor que responde
     @ManyToOne(optional = false)
     @JoinColumn(name = "tutor_id")
     private Tutor tutor;
@@ -33,7 +31,6 @@ public class Answer {
     @Column(nullable = false, columnDefinition = "text")
     private String body;
 
-    // Para controlar versiones internas para manejar "correcciones"
     @Column(nullable = false)
     private Integer version;
 
