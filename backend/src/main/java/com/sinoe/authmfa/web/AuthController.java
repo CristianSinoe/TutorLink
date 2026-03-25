@@ -41,12 +41,11 @@ public class AuthController {
     record ActivateRequest(String token) {
     }
 
-    
     // 1) Registro normal (front público)
-    
+
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody AuthDtos.RegisterRequest reqDto,
-                                      HttpServletRequest http) {
+            HttpServletRequest http) {
         Long uid = null;
         try {
             boolean human = recaptcha.verify(reqDto.getRecaptchaToken(), http.getRemoteAddr());
@@ -102,9 +101,9 @@ public class AuthController {
         }
     }
 
-    
-    // 2) Activación de cuenta creada por ADMIN (flujo viejo por token de activación)
-    
+    // 2) Activación de cuenta creada por ADMIN (flujo viejo por token de
+    // activación)
+
     @PostMapping("/activate")
     public ResponseEntity<?> activate(@RequestBody ActivateRequest req, HttpServletRequest http) {
         String rawToken = req.token();
@@ -148,12 +147,11 @@ public class AuthController {
         return ResponseEntity.ok(new AuthDtos.ApiMessage("Cuenta activada correctamente"));
     }
 
-    
     // 2.1) Completar primer login (link enviado por correo)
-    
+
     @PostMapping("/first-login/complete")
     public ResponseEntity<?> completeFirstLogin(@Valid @RequestBody FirstLoginRequest req,
-                                                HttpServletRequest http) {
+            HttpServletRequest http) {
         Long uid = null;
         try {
             String rawToken = req.token();
@@ -206,12 +204,11 @@ public class AuthController {
         }
     }
 
-    
     // 3) Login
-    
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody AuthDtos.LoginRequest reqDto,
-                                   HttpServletRequest http) {
+            HttpServletRequest http) {
         Long uid = null;
         try {
             // 1) Validar reCAPTCHA
@@ -270,16 +267,8 @@ public class AuthController {
             // 4) Si pasó credenciales y status, generamos OTP para LOGIN
             var otp = otpService.generateLoginOtpForUser(u.getId());
 
-            // 5) Enviar OTP por correo
-            String subject = "TutorLink - Código de acceso";
-            String html = """
-                    <h2>Código de acceso a TutorLink</h2>
-                    <p>Tu código de acceso es:</p>
-                    <p style="font-size: 24px; font-weight: bold;">%s</p>
-                    <p>Este código expira en pocos minutos. Si no fuiste tú, puedes ignorar este mensaje.</p>
-                    """.formatted(otp.getCode());
-
-            emailService.sendEmail(u.getEmail(), subject, html);
+            // 5) Enviar OTP por correo (template profesional)
+            emailService.sendLoginOtpEmail(u.getEmail(), otp.getCode());
 
             // 6) Registrar en auditoría que el login pasó a fase OTP
             audit.log(http, uid, "LOGIN_OTP_REQUEST", true, null,
@@ -360,9 +349,8 @@ public class AuthController {
         }
     }
 
-    
     // 4) Solicitar cambio de contraseña (envía OTP)
-    
+
     @PostMapping("/password/change/request")
     public ResponseEntity<?> requestPasswordChange(
             Authentication auth,
@@ -396,9 +384,8 @@ public class AuthController {
                 new AuthDtos.ApiMessage("Se envió un código a tu correo institucional."));
     }
 
-    
     // 5) Confirmar cambio de contraseña (valida OTP)
-    
+
     @PostMapping("/password/change/confirm")
     public ResponseEntity<?> confirmPasswordChange(
             Authentication auth,
