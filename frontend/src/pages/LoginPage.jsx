@@ -1,14 +1,17 @@
 // src/pages/LoginPage.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import apiClient from "../api/axiosClient";
 import { useNavigate } from "react-router-dom";
 import ReCAPTCHA from "react-google-recaptcha";
 import Logo from "../components/Logo";
+import LoginPreloader from "../components/LoginPreloader";
 
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 export default function LoginPage() {
   const navigate = useNavigate();
+
+  const [showPreloader, setShowPreloader] = useState(true);
 
   const [form, setForm] = useState({
     email: "",
@@ -19,6 +22,12 @@ export default function LoginPage() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  // controlar duración del preloader
+  useEffect(() => {
+    const timer = setTimeout(() => setShowPreloader(false), 5600);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -58,7 +67,7 @@ export default function LoginPage() {
         return;
       }
 
-      // 2️⃣ LOGIN COMPLETO SIN OTP (por si algún día aplica)
+      // 2️⃣ LOGIN COMPLETO SIN OTP
       const { token, role, name, email } = data;
 
       localStorage.setItem("authToken", token);
@@ -87,6 +96,12 @@ export default function LoginPage() {
     }
   };
 
+  // 🔥 mostrar preloader sólo en login
+  if (showPreloader) {
+    return <LoginPreloader onDone={() => setShowPreloader(false)} />;
+  }
+
+  // Tu login tal cual
   return (
     <div className="min-h-screen flex bg-slate-50">
       {/* LADO IZQUIERDO – Branding (igual estilo que OTP) */}
