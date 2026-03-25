@@ -2,6 +2,92 @@
 import { useEffect, useState } from "react";
 import apiClient from "../../api/axiosClient";
 
+/* ============================
+   VALIDACIÓN DE TUTORES
+============================= */
+function validateTutor(values, { isEdit = false } = {}) {
+  const errors = {};
+  const isEmpty = (v) => !v || !String(v).trim();
+
+  // Nombre
+  if (isEmpty(values.name)) {
+    errors.name = "El nombre es obligatorio.";
+  } else if (values.name.trim().length < 2) {
+    errors.name = "El nombre debe tener al menos 2 caracteres.";
+  } else if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$/.test(values.name.trim())) {
+    errors.name = "El nombre solo puede contener letras y espacios.";
+  }
+
+  // Apellido paterno
+  if (isEmpty(values.lastNamePaterno)) {
+    errors.lastNamePaterno = "El apellido paterno es obligatorio.";
+  } else if (values.lastNamePaterno.trim().length < 2) {
+    errors.lastNamePaterno = "Debe tener mínimo 2 caracteres.";
+  } else if (
+    !/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$/.test(values.lastNamePaterno.trim())
+  ) {
+    errors.lastNamePaterno = "Solo letras y espacios.";
+  }
+
+  // Apellido materno (opcional)
+  if (!isEmpty(values.lastNameMaterno)) {
+    if (values.lastNameMaterno.trim().length < 2) {
+      errors.lastNameMaterno = "Debe tener mínimo 2 caracteres.";
+    } else if (
+      !/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$/.test(values.lastNameMaterno.trim())
+    ) {
+      errors.lastNameMaterno = "Solo letras y espacios.";
+    }
+  }
+
+  // Email
+  if (isEmpty(values.email)) {
+    errors.email = "El correo es obligatorio.";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) {
+    errors.email = "Ingresa un correo válido.";
+  }
+
+  // Contraseña (solo al crear)
+  if (!isEdit) {
+    if (isEmpty(values.password)) {
+      errors.password = "La contraseña es obligatoria.";
+    } else if (values.password.length < 8) {
+      errors.password = "Debe tener al menos 8 caracteres.";
+    }
+  }
+
+  // Código de tutor
+  if (isEmpty(values.tutorCode)) {
+    errors.tutorCode = "El código de tutor es obligatorio.";
+  } else if (values.tutorCode.trim().length < 3) {
+    errors.tutorCode = "Debe tener al menos 3 caracteres.";
+  }
+
+  // Departamento
+  if (isEmpty(values.department)) {
+    errors.department = "El departamento es obligatorio.";
+  } else if (values.department.trim().length < 2) {
+    errors.department = "Debe tener al menos 2 caracteres.";
+  }
+
+  // Especialidad
+  if (isEmpty(values.specialty)) {
+    errors.specialty = "La especialidad es obligatoria.";
+  } else if (values.specialty.trim().length < 2) {
+    errors.specialty = "Debe tener al menos 2 caracteres.";
+  }
+
+  // Teléfono
+  if (!isEmpty(values.phone)) {
+    const digits = values.phone.replace(/\D/g, "");
+    if (digits.length !== 10) {
+      errors.phone = "El teléfono debe tener 10 dígitos.";
+    }
+  }
+
+  return errors;
+}
+
 export default function TutorsPage() {
   const [tutors, setTutors] = useState([]);
   const [search, setSearch] = useState("");
@@ -48,6 +134,12 @@ export default function TutorsPage() {
   // Feedback global (éxito / error)
   const [feedback, setFeedback] = useState(null); // { type: 'success' | 'error', message: string }
 
+  // Errores específicos de formularios
+  const [createErrors, setCreateErrors] = useState({});
+  const [createError, setCreateError] = useState(null);
+  const [editErrors, setEditErrors] = useState({});
+  const [editError, setEditError] = useState(null);
+
   // Paginación
   const [page, setPage] = useState(1);
   const pageSize = 5;
@@ -83,6 +175,14 @@ export default function TutorsPage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    // limpiar error de ese campo
+    setCreateErrors((prev) => {
+      if (!prev[name]) return prev;
+      const copy = { ...prev };
+      delete copy[name];
+      return copy;
+    });
+    setCreateError(null);
   };
 
   const resetForm = () => {
@@ -97,23 +197,30 @@ export default function TutorsPage() {
       specialty: "",
       phone: "",
     });
+    setCreateErrors({});
+    setCreateError(null);
   };
 
   const handleCreate = async (e) => {
     e.preventDefault();
+
+    const fieldErrors = validateTutor(form, { isEdit: false });
+    if (Object.keys(fieldErrors).length > 0) {
+      setCreateErrors(fieldErrors);
+      setCreateError("Revisa los campos marcados en rojo.");
+      return;
+    }
+
     try {
       setSaving(true);
-      setFeedback(null);
+      setCreateError(null);
 
-      const payload = { ...form };
+      const { data } = await apiClient.post("/api/admin/users/tutors", form);
 
-      const { data } = await apiClient.post(
-        "/api/admin/users/tutors",
-        payload
-      );
-
-      const msg = data?.message || "Tutor creado correctamente.";
-      setFeedback({ type: "success", message: msg });
+      setFeedback({
+        type: "success",
+        message: data?.message || "Tutor creado correctamente.",
+      });
 
       resetForm();
       setIsCreateOpen(false);
@@ -124,7 +231,7 @@ export default function TutorsPage() {
         err?.response?.data?.message ||
         err?.response?.data?.error ||
         "Error al crear tutor.";
-      setFeedback({ type: "error", message: msg });
+      setCreateError(msg);
     } finally {
       setSaving(false);
     }
@@ -194,23 +301,39 @@ export default function TutorsPage() {
       phone: tutor.phone || "",
       status: initialStatus,
     });
+    setEditErrors({});
+    setEditError(null);
     setFeedback(null);
   };
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditForm((prev) => ({ ...prev, [name]: value }));
+    setEditErrors((prev) => {
+      if (!prev[name]) return prev;
+      const copy = { ...prev };
+      delete copy[name];
+      return copy;
+    });
+    setEditError(null);
   };
 
   const handleUpdateTutor = async () => {
     if (!editTutor) return;
+
+    const fieldErrors = validateTutor(editForm, { isEdit: true });
+    if (Object.keys(fieldErrors).length > 0) {
+      setEditErrors(fieldErrors);
+      setEditError("Revisa los campos marcados en rojo.");
+      return;
+    }
+
     try {
       setUpdatingEdit(true);
-      setFeedback(null);
+      setEditError(null);
 
       // 1) Actualizar datos generales (PUT)
       const { status, ...body } = editForm;
-
       await apiClient.put(`/api/admin/users/tutors/${editTutor.id}`, body);
 
       // 2) Actualizar estado (PATCH)
@@ -231,7 +354,7 @@ export default function TutorsPage() {
         err?.response?.data?.message ||
         err?.response?.data?.error ||
         "Error al actualizar tutor.";
-      setFeedback({ type: "error", message: msg });
+      setEditError(msg);
     } finally {
       setUpdatingEdit(false);
     }
@@ -316,6 +439,8 @@ export default function TutorsPage() {
             onClick={() => {
               setIsCreateOpen(true);
               setFeedback(null);
+              setCreateErrors({});
+              setCreateError(null);
             }}
             className="
               px-4 py-2 rounded-full 
@@ -329,7 +454,7 @@ export default function TutorsPage() {
         </div>
       </div>
 
-      {/* FEEDBACK */}
+      {/* FEEDBACK GLOBAL */}
       {feedback && (
         <div
           className={`px-4 py-3 rounded-xl text-sm border ${feedback.type === "error"
@@ -343,7 +468,13 @@ export default function TutorsPage() {
       )}
 
       {/* FILTROS */}
-      <section className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <section
+        className="
+          bg-white border border-slate-200 rounded-2xl shadow-sm p-4 
+          flex flex-col gap-4 
+          md:flex-row md:items-start md:justify-between
+        "
+      >
         <div className="flex-1">
           <label className="block text-xs font-semibold text-slate-700 mb-1">
             Buscar
@@ -382,10 +513,10 @@ export default function TutorsPage() {
           <button
             onClick={clearFilters}
             className="
-              px-4 py-2 border border-slate-300 rounded-full 
-              text-slate-700 hover:bg-slate-100 
-              text-sm transition
-            "
+    bg-white border border-slate-200 rounded-2xl shadow-sm p-4 
+    flex flex-col gap-4 
+    md:flex-row md:items-start md:justify-between
+  "
           >
             Limpiar
           </button>
@@ -565,6 +696,18 @@ export default function TutorsPage() {
             Crear tutor
           </h2>
 
+          {createError && (
+            <div
+              className="
+                mb-3 text-xs text-red-700 bg-red-50 border border-red-200 
+                rounded-lg px-3 py-2
+              "
+              role="alert"
+            >
+              {createError}
+            </div>
+          )}
+
           <form
             onSubmit={handleCreate}
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
@@ -574,18 +717,21 @@ export default function TutorsPage() {
               name="name"
               value={form.name}
               onChange={handleChange}
+              error={createErrors.name}
             />
             <Input
               label="Apellido paterno"
               name="lastNamePaterno"
               value={form.lastNamePaterno}
               onChange={handleChange}
+              error={createErrors.lastNamePaterno}
             />
             <Input
               label="Apellido materno"
               name="lastNameMaterno"
               value={form.lastNameMaterno}
               onChange={handleChange}
+              error={createErrors.lastNameMaterno}
             />
             <Input
               label="Correo institucional"
@@ -593,6 +739,7 @@ export default function TutorsPage() {
               type="email"
               value={form.email}
               onChange={handleChange}
+              error={createErrors.email}
             />
             <Input
               label="Contraseña inicial"
@@ -600,30 +747,35 @@ export default function TutorsPage() {
               type="password"
               value={form.password}
               onChange={handleChange}
+              error={createErrors.password}
             />
             <Input
               label="Código de tutor"
               name="tutorCode"
               value={form.tutorCode}
               onChange={handleChange}
+              error={createErrors.tutorCode}
             />
             <Input
               label="Departamento"
               name="department"
               value={form.department}
               onChange={handleChange}
+              error={createErrors.department}
             />
             <Input
               label="Especialidad"
               name="specialty"
               value={form.specialty}
               onChange={handleChange}
+              error={createErrors.specialty}
             />
             <Input
               label="Teléfono"
               name="phone"
               value={form.phone}
               onChange={handleChange}
+              error={createErrors.phone}
             />
 
             <div className="col-span-full flex justify-end gap-3 mt-2">
@@ -767,24 +919,39 @@ export default function TutorsPage() {
             Editar tutor
           </h2>
 
+          {editError && (
+            <div
+              className="
+                mb-3 text-xs text-red-700 bg-red-50 border border-red-200 
+                rounded-lg px-3 py-2
+              "
+              role="alert"
+            >
+              {editError}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <Input
               label="Nombre"
               name="name"
               value={editForm.name}
               onChange={handleEditChange}
+              error={editErrors.name}
             />
             <Input
               label="Apellido paterno"
               name="lastNamePaterno"
               value={editForm.lastNamePaterno}
               onChange={handleEditChange}
+              error={editErrors.lastNamePaterno}
             />
             <Input
               label="Apellido materno"
               name="lastNameMaterno"
               value={editForm.lastNameMaterno}
               onChange={handleEditChange}
+              error={editErrors.lastNameMaterno}
             />
             <Input
               label="Correo institucional"
@@ -792,30 +959,35 @@ export default function TutorsPage() {
               type="email"
               value={editForm.email}
               onChange={handleEditChange}
+              error={editErrors.email}
             />
             <Input
               label="Código de tutor"
               name="tutorCode"
               value={editForm.tutorCode}
               onChange={handleEditChange}
+              error={editErrors.tutorCode}
             />
             <Input
               label="Departamento"
               name="department"
               value={editForm.department}
               onChange={handleEditChange}
+              error={editErrors.department}
             />
             <Input
               label="Especialidad"
               name="specialty"
               value={editForm.specialty}
               onChange={handleEditChange}
+              error={editErrors.specialty}
             />
             <Input
               label="Teléfono"
               name="phone"
               value={editForm.phone}
               onChange={handleEditChange}
+              error={editErrors.phone}
             />
 
             <div className="col-span-full">
@@ -878,7 +1050,7 @@ export default function TutorsPage() {
    COMPONENTES AUXILIARES
 ============================= */
 
-function Input({ label, name, value, onChange, type = "text" }) {
+function Input({ label, name, value, onChange, type = "text", error }) {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === "password";
 
@@ -891,11 +1063,12 @@ function Input({ label, name, value, onChange, type = "text" }) {
           name={name}
           value={value}
           onChange={onChange}
-          className="
-            w-full border border-slate-300 rounded-lg px-3 py-2 
-            focus:ring-2 focus:ring-uvBlue outline-none text-sm
-            pr-10
-          "
+          className={`
+            w-full rounded-lg px-3 py-2 text-sm pr-10
+            border ${error ? "border-red-400" : "border-slate-300"}
+            focus:ring-2 ${error ? "focus:ring-red-400" : "focus:ring-uvBlue"}
+            outline-none
+          `}
         />
         {isPassword && (
           <button
@@ -911,6 +1084,9 @@ function Input({ label, name, value, onChange, type = "text" }) {
           </button>
         )}
       </div>
+      {error && (
+        <p className="text-xs text-red-600 mt-1">{error}</p>
+      )}
     </div>
   );
 }
@@ -946,14 +1122,11 @@ function Modal({ children, onClose }) {
           ✕
         </button>
 
-        <div className="p-6">
-          {children}
-        </div>
+        <div className="p-6">{children}</div>
       </div>
     </div>
   );
 }
-
 
 function StatusBadge({ status }) {
   if (!status) {
@@ -964,8 +1137,7 @@ function StatusBadge({ status }) {
     );
   }
 
-  let classes =
-    "bg-slate-100 text-slate-700 border border-slate-200";
+  let classes = "bg-slate-100 text-slate-700 border border-slate-200";
   let label = status;
 
   switch (status) {
@@ -1008,9 +1180,7 @@ function Detail({ label, value }) {
     <div>
       <p className="text-xs font-semibold text-slate-500">{label}</p>
       <p className="text-sm text-slate-800 mt-0.5">
-        {value === undefined || value === null || value === ""
-          ? "—"
-          : value}
+        {value === undefined || value === null || value === "" ? "—" : value}
       </p>
     </div>
   );

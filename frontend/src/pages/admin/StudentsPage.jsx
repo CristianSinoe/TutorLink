@@ -1,5 +1,140 @@
+// src/pages/admin/StudentsPage.jsx
 import { useEffect, useState } from "react";
 import apiClient from "../../api/axiosClient";
+
+/* ============================
+   HELPERS DE VALIDACIÓN
+============================= */
+
+function calcularEdad(dateStr) {
+  const birth = new Date(dateStr);
+  if (Number.isNaN(birth.getTime())) return null;
+
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
+function validateStudent(values, { isEdit = false } = {}) {
+  const errors = {};
+  const isEmpty = (v) => !v || !String(v).trim();
+
+  // Nombre
+  if (isEmpty(values.name)) {
+    errors.name = "El nombre es obligatorio.";
+  } else if (values.name.trim().length < 2) {
+    errors.name = "El nombre debe tener al menos 2 caracteres.";
+  } else if (!/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$/.test(values.name.trim())) {
+    errors.name = "El nombre solo puede contener letras y espacios.";
+  }
+
+  // Apellido paterno
+  if (isEmpty(values.lastNamePaterno)) {
+    errors.lastNamePaterno = "El apellido paterno es obligatorio.";
+  } else if (values.lastNamePaterno.trim().length < 2) {
+    errors.lastNamePaterno =
+      "El apellido paterno debe tener al menos 2 caracteres.";
+  } else if (
+    !/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$/.test(values.lastNamePaterno.trim())
+  ) {
+    errors.lastNamePaterno =
+      "El apellido paterno solo puede contener letras y espacios.";
+  }
+
+  // Apellido materno (opcional, pero si se captura, validar)
+  if (!isEmpty(values.lastNameMaterno)) {
+    if (values.lastNameMaterno.trim().length < 2) {
+      errors.lastNameMaterno =
+        "El apellido materno debe tener al menos 2 caracteres.";
+    } else if (
+      !/^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$/.test(values.lastNameMaterno.trim())
+    ) {
+      errors.lastNameMaterno =
+        "El apellido materno solo puede contener letras y espacios.";
+    }
+  }
+
+  // Email
+  if (isEmpty(values.email)) {
+    errors.email = "El correo institucional es obligatorio.";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) {
+    errors.email = "Ingresa un correo electrónico válido.";
+  }
+
+  // Contraseña solo en crear (no en editar)
+  if (!isEdit) {
+    if (isEmpty(values.password)) {
+      errors.password = "La contraseña inicial es obligatoria.";
+    } else if (values.password.length < 8) {
+      errors.password = "La contraseña debe tener al menos 8 caracteres.";
+    }
+  }
+
+  // Matrícula
+  if (isEmpty(values.matricula)) {
+    errors.matricula = "La matrícula es obligatoria.";
+  } else if (values.matricula.trim().length < 4) {
+    errors.matricula = "La matrícula debe tener al menos 4 caracteres.";
+  } else if (!/^S/i.test(values.matricula.trim())) {
+    errors.matricula = "La matrícula debe iniciar con la letra S.";
+  }
+
+  // Carrera
+  if (isEmpty(values.career)) {
+    errors.career = "La carrera es obligatoria.";
+  } else if (values.career.trim().length < 2) {
+    errors.career = "La carrera debe tener al menos 2 caracteres.";
+  }
+
+  // Plan
+  if (isEmpty(values.plan)) {
+    errors.plan = "El plan es obligatorio.";
+  } else if (values.plan.trim().length < 2) {
+    errors.plan = "El plan debe tener al menos 2 caracteres.";
+  }
+
+  // Semestre
+  if (isEmpty(values.semester)) {
+    errors.semester = "El semestre es obligatorio.";
+  } else {
+    const num = Number(values.semester);
+    if (Number.isNaN(num)) {
+      errors.semester = "El semestre debe ser un número.";
+    } else if (num < 1 || num > 15) {
+      errors.semester = "El semestre debe estar entre 1 y 15.";
+    }
+  }
+
+  // Teléfono (opcional, pero si existe, validar)
+  if (!isEmpty(values.phone)) {
+    const onlyDigits = values.phone.replace(/\D/g, "");
+    if (onlyDigits.length !== 10) {
+      errors.phone = "El teléfono debe tener 10 dígitos.";
+    }
+  }
+
+  // Fecha de nacimiento
+  if (isEmpty(values.birthDate)) {
+    errors.birthDate = "La fecha de nacimiento es obligatoria.";
+  } else {
+    const age = calcularEdad(values.birthDate);
+    if (age === null) {
+      errors.birthDate = "La fecha de nacimiento no es válida.";
+    } else if (age < 15 || age > 120) {
+      errors.birthDate = "La edad debe estar entre 15 y 120 años.";
+    }
+  }
+
+  return errors;
+}
+
+/* ============================
+   PÁGINA PRINCIPAL
+============================= */
 
 export default function StudentsPage() {
   const [students, setStudents] = useState([]);
@@ -47,8 +182,15 @@ export default function StudentsPage() {
   const [importing, setImporting] = useState(false);
   const [updatingEdit, setUpdatingEdit] = useState(false);
 
-  // Feedback (éxito / error)
-  const [feedback, setFeedback] = useState(null); // { type: 'success' | 'error', message: string }
+  // Feedback (éxito / error global)
+  const [feedback, setFeedback] = useState(null);
+
+  // Errores específicos de los modales
+  const [createError, setCreateError] = useState(null); // mensaje general
+  const [createErrors, setCreateErrors] = useState({}); // por campo
+
+  const [editError, setEditError] = useState(null);
+  const [editErrors, setEditErrors] = useState({});
 
   // Paginación
   const [page, setPage] = useState(1);
@@ -85,6 +227,8 @@ export default function StudentsPage() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    // limpiar error de ese campo
+    setCreateErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   const resetForm = () => {
@@ -105,9 +249,19 @@ export default function StudentsPage() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
+
+    // 1) Validación en frontend
+    const fieldErrors = validateStudent(form, { isEdit: false });
+    if (Object.keys(fieldErrors).length > 0) {
+      setCreateErrors(fieldErrors);
+      setCreateError("Revisa los campos marcados en rojo.");
+      return;
+    }
+
     try {
       setSaving(true);
       setFeedback(null);
+      setCreateError(null);
 
       const payload = {
         ...form,
@@ -124,6 +278,7 @@ export default function StudentsPage() {
       setFeedback({ type: "success", message: msg });
 
       resetForm();
+      setCreateErrors({});
       setIsCreateOpen(false);
       loadStudents();
     } catch (err) {
@@ -132,7 +287,8 @@ export default function StudentsPage() {
         err?.response?.data?.message ||
         err?.response?.data?.error ||
         "Error al crear estudiante.";
-      setFeedback({ type: "error", message: msg });
+      // Error de backend: lo mostramos dentro del modal
+      setCreateError(msg);
     } finally {
       setSaving(false);
     }
@@ -207,18 +363,31 @@ export default function StudentsPage() {
       phone: student.phone || "",
       status: initialStatus,
     });
+    setEditError(null);
+    setEditErrors({});
     setFeedback(null);
   };
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditForm((prev) => ({ ...prev, [name]: value }));
+    setEditErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   const handleUpdateStudent = async () => {
     if (!editStudent) return;
+
+    // 1) Validar en frontend (sin contraseña)
+    const fieldErrors = validateStudent(editForm, { isEdit: true });
+    if (Object.keys(fieldErrors).length > 0) {
+      setEditErrors(fieldErrors);
+      setEditError("Revisa los campos marcados en rojo.");
+      return;
+    }
+
     try {
       setUpdatingEdit(true);
+      setEditError(null);
       setFeedback(null);
 
       // 1) Actualizar datos generales (PUT)
@@ -251,7 +420,8 @@ export default function StudentsPage() {
         err?.response?.data?.message ||
         err?.response?.data?.error ||
         "Error al actualizar estudiante.";
-      setFeedback({ type: "error", message: msg });
+      // Mostrar dentro del modal
+      setEditError(msg);
     } finally {
       setUpdatingEdit(false);
     }
@@ -336,6 +506,8 @@ export default function StudentsPage() {
             onClick={() => {
               setIsCreateOpen(true);
               setFeedback(null);
+              setCreateError(null);
+              setCreateErrors({});
             }}
             className="
               px-4 py-2 rounded-full 
@@ -349,14 +521,13 @@ export default function StudentsPage() {
         </div>
       </div>
 
-      {/* FEEDBACK */}
+      {/* FEEDBACK GLOBAL */}
       {feedback && (
         <div
-          className={`px-4 py-3 rounded-xl text-sm border ${
-            feedback.type === "error"
+          className={`px-4 py-3 rounded-xl text-sm border ${feedback.type === "error"
               ? "bg-red-50 border-red-200 text-red-800"
               : "bg-emerald-50 border-emerald-200 text-emerald-800"
-          }`}
+            }`}
           role={feedback.type === "error" ? "alert" : "status"}
         >
           {feedback.message}
@@ -364,7 +535,7 @@ export default function StudentsPage() {
       )}
 
       {/* FILTROS */}
-      <section className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <section className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="flex-1">
           <label className="block text-xs font-semibold text-slate-700 mb-1">
             Buscar
@@ -402,10 +573,10 @@ export default function StudentsPage() {
           <button
             onClick={clearFilters}
             className="
-              px-4 py-2 border border-slate-300 rounded-full 
-              text-slate-700 hover:bg-slate-100 
-              text-sm transition
-            "
+    bg-white border border-slate-200 rounded-2xl shadow-sm p-4 
+    flex flex-col gap-4 
+    md:flex-row md:items-start md:justify-between
+  "
           >
             Limpiar
           </button>
@@ -581,9 +752,20 @@ export default function StudentsPage() {
       {/* MODAL CREAR ESTUDIANTE */}
       {isCreateOpen && (
         <Modal onClose={() => !saving && setIsCreateOpen(false)}>
-          <h2 className="text-xl font-semibold text-uvBlue mb-4">
+          <h2 className="text-xl font-semibold text-uvBlue mb-2">
             Crear estudiante
           </h2>
+
+          {createError && (
+            <div
+              className="
+                mb-3 text-xs text-red-700 bg-red-50 border border-red-200
+                rounded-lg px-3 py-2
+              "
+            >
+              {createError}
+            </div>
+          )}
 
           <form
             onSubmit={handleCreate}
@@ -594,18 +776,21 @@ export default function StudentsPage() {
               name="name"
               value={form.name}
               onChange={handleChange}
+              error={createErrors.name}
             />
             <Input
               label="Apellido paterno"
               name="lastNamePaterno"
               value={form.lastNamePaterno}
               onChange={handleChange}
+              error={createErrors.lastNamePaterno}
             />
             <Input
               label="Apellido materno"
               name="lastNameMaterno"
               value={form.lastNameMaterno}
               onChange={handleChange}
+              error={createErrors.lastNameMaterno}
             />
             <Input
               label="Correo institucional"
@@ -613,6 +798,7 @@ export default function StudentsPage() {
               type="email"
               value={form.email}
               onChange={handleChange}
+              error={createErrors.email}
             />
             <Input
               label="Contraseña inicial"
@@ -620,36 +806,42 @@ export default function StudentsPage() {
               type="password"
               value={form.password}
               onChange={handleChange}
+              error={createErrors.password}
             />
             <Input
               label="Matrícula"
               name="matricula"
               value={form.matricula}
               onChange={handleChange}
+              error={createErrors.matricula}
             />
             <Input
               label="Carrera"
               name="career"
               value={form.career}
               onChange={handleChange}
+              error={createErrors.career}
             />
             <Input
               label="Plan"
               name="plan"
               value={form.plan}
               onChange={handleChange}
+              error={createErrors.plan}
             />
             <Input
               label="Semestre"
               name="semester"
               value={form.semester}
               onChange={handleChange}
+              error={createErrors.semester}
             />
             <Input
               label="Teléfono"
               name="phone"
               value={form.phone}
               onChange={handleChange}
+              error={createErrors.phone}
             />
             <Input
               label="Fecha de nacimiento"
@@ -657,6 +849,7 @@ export default function StudentsPage() {
               type="date"
               value={form.birthDate}
               onChange={handleChange}
+              error={createErrors.birthDate}
             />
 
             <div className="col-span-full flex justify-end gap-3 mt-2">
@@ -667,6 +860,8 @@ export default function StudentsPage() {
                   if (!saving) {
                     setIsCreateOpen(false);
                     resetForm();
+                    setCreateError(null);
+                    setCreateErrors({});
                   }
                 }}
                 className="
@@ -764,9 +959,8 @@ export default function StudentsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
             <Detail
               label="Nombre"
-              value={`${viewStudent.name} ${viewStudent.lastNamePaterno} ${
-                viewStudent.lastNameMaterno || ""
-              }`}
+              value={`${viewStudent.name} ${viewStudent.lastNamePaterno} ${viewStudent.lastNameMaterno || ""
+                }`}
             />
             <Detail label="Matrícula" value={viewStudent.matricula} />
             <Detail label="Correo" value={viewStudent.email} />
@@ -802,9 +996,20 @@ export default function StudentsPage() {
       {/* MODAL EDITAR ESTUDIANTE (PUT + PATCH STATUS) */}
       {editStudent && (
         <Modal onClose={() => !updatingEdit && setEditStudent(null)}>
-          <h2 className="text-xl font-semibold text-uvBlue mb-4">
+          <h2 className="text-xl font-semibold text-uvBlue mb-2">
             Editar estudiante
           </h2>
+
+          {editError && (
+            <div
+              className="
+                mb-3 text-xs text-red-700 bg-red-50 border border-red-200
+                rounded-lg px-3 py-2
+              "
+            >
+              {editError}
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <Input
@@ -812,18 +1017,21 @@ export default function StudentsPage() {
               name="name"
               value={editForm.name}
               onChange={handleEditChange}
+              error={editErrors.name}
             />
             <Input
               label="Apellido paterno"
               name="lastNamePaterno"
               value={editForm.lastNamePaterno}
               onChange={handleEditChange}
+              error={editErrors.lastNamePaterno}
             />
             <Input
               label="Apellido materno"
               name="lastNameMaterno"
               value={editForm.lastNameMaterno}
               onChange={handleEditChange}
+              error={editErrors.lastNameMaterno}
             />
             <Input
               label="Correo institucional"
@@ -831,36 +1039,42 @@ export default function StudentsPage() {
               type="email"
               value={editForm.email}
               onChange={handleEditChange}
+              error={editErrors.email}
             />
             <Input
               label="Matrícula"
               name="matricula"
               value={editForm.matricula}
               onChange={handleEditChange}
+              error={editErrors.matricula}
             />
             <Input
               label="Carrera"
               name="career"
               value={editForm.career}
               onChange={handleEditChange}
+              error={editErrors.career}
             />
             <Input
               label="Plan"
               name="plan"
               value={editForm.plan}
               onChange={handleEditChange}
+              error={editErrors.plan}
             />
             <Input
               label="Semestre"
               name="semester"
               value={editForm.semester}
               onChange={handleEditChange}
+              error={editErrors.semester}
             />
             <Input
               label="Teléfono"
               name="phone"
               value={editForm.phone}
               onChange={handleEditChange}
+              error={editErrors.phone}
             />
             <Input
               label="Fecha de nacimiento"
@@ -868,6 +1082,7 @@ export default function StudentsPage() {
               type="date"
               value={editForm.birthDate}
               onChange={handleEditChange}
+              error={editErrors.birthDate}
             />
 
             <div className="col-span-full">
@@ -932,9 +1147,19 @@ export default function StudentsPage() {
 
 import { useState as useStateLocal } from "react";
 
-function Input({ label, name, value, onChange, type = "text" }) {
+function Input({ label, name, value, onChange, type = "text", error }) {
   const [showPassword, setShowPassword] = useStateLocal(false);
   const isPassword = type === "password";
+
+  const commonClasses = `
+    w-full border rounded-lg px-3 py-2 
+    focus:ring-2 outline-none text-sm
+    pr-10
+  `;
+
+  const borderClasses = error
+    ? "border-red-400 focus:ring-red-400"
+    : "border-slate-300 focus:ring-uvBlue";
 
   return (
     <div className="flex flex-col">
@@ -945,11 +1170,7 @@ function Input({ label, name, value, onChange, type = "text" }) {
           name={name}
           value={value}
           onChange={onChange}
-          className="
-            w-full border border-slate-300 rounded-lg px-3 py-2 
-            focus:ring-2 focus:ring-uvBlue outline-none text-sm
-            pr-10
-          "
+          className={`${commonClasses} ${borderClasses}`}
         />
         {isPassword && (
           <button
@@ -959,12 +1180,17 @@ function Input({ label, name, value, onChange, type = "text" }) {
               absolute inset-y-0 right-2 flex items-center 
               text-[11px] text-slate-500 hover:text-slate-800
             "
-            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            aria-label={
+              showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+            }
           >
             {showPassword ? "Ocultar" : "Ver"}
           </button>
         )}
       </div>
+      {error && (
+        <p className="mt-1 text-xs text-red-600">{error}</p>
+      )}
     </div>
   );
 }
@@ -1001,14 +1227,11 @@ function Modal({ children, onClose }) {
         </button>
 
         {/* Contenido del modal */}
-        <div className="p-6">
-          {children}
-        </div>
+        <div className="p-6">{children}</div>
       </div>
     </div>
   );
 }
-
 
 function StatusBadge({ status }) {
   if (!status) {
