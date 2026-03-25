@@ -21,5 +21,10 @@ nbactions.xml
 # OS
 .DS_Store
 
+# Environment
+.env
+.env.*
+!.env.example
+
 # Otros binarios
 *.jar
