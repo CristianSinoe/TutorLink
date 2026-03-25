@@ -34,7 +34,6 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // públicos
                         .requestMatchers(
                                 "/api/health",
                                 "/api/auth/register",
@@ -47,23 +46,15 @@ public class SecurityConfig {
                                 "/api/auth/first-login",
                                 "/api/auth/first-login/verify-otp",
                                 "/error",
-                                "/api/auth/dev/hash")
-                        .permitAll()
-
-                        // docs
+                                "/api/auth/dev/hash"
+                        ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/dev/email-preview/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/docs/**").permitAll()
-
-                        // ADMIN
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                        // TUTOR
                         .requestMatchers("/api/tutor/**").hasRole("TUTOR")
-
-                        // ESTUDIANTE
                         .requestMatchers("/api/student/**").hasRole("ESTUDIANTE")
-
-                        // cualquier otra requiere estar autenticado
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated()
+                )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -74,7 +65,9 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "http://192.168.100.12:5173"));
+                "http://192.168.100.12:5173",
+                "http://192.168.237.15:5173"
+        ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
