@@ -144,7 +144,7 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }) {
         </button>
 
         {/* Encabezado general + paso */}
-        <div className="flex items-start justify-between mb-4 gap-3">
+        <div className="mb-4 space-y-3 pr-8">
           <div>
             <h2 className="text-xl font-semibold text-uvBlue">
               Cambiar contraseña
@@ -156,11 +156,11 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }) {
 
           <div
             className="
-              inline-flex items-center gap-1 
-              px-3 py-1 rounded-full 
-              bg-uvGreen/10 text-uvGreen 
-              text-[11px] font-medium
-            "
+      inline-flex items-center gap-1 
+      px-3 py-1 rounded-full 
+      bg-uvGreen/10 text-uvGreen 
+      text-[10px] font-medium
+    "
           >
             <span className="inline-block w-2 h-2 rounded-full bg-uvGreen" />
             <span>
@@ -169,6 +169,9 @@ export default function ChangePasswordModal({ isOpen, onClose, userEmail }) {
             </span>
           </div>
         </div>
+
+
+
 
         {/* PASO 1 */}
         {step === 1 && (
